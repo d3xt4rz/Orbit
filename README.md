@@ -1,28 +1,3 @@
-```
-Orbit
-```
-
-### **Descrição curta (máx. 160 caracteres)**
-```
-Orbit - Ferramenta CLI para montagem remota via SSHFS e conexão SSH rápida, com menu interativo e logs coloridos.
-```
-
-### **Tópicos (tags)**
-```
-sshfs, ssh, remote-mount, bash, cli, terminal, linux, sysadmin, devops, remote-access
-```
-
-### **Badges (opcional, para enfeitar)**
-- `![License](https://img.shields.io/badge/license-MIT-blue)`
-- `![Bash](https://img.shields.io/badge/shell-bash-green)`
-- `![Version](https://img.shields.io/badge/version-1.0.0-orange)`
-
----
-
-## 📄 README.md (completo)
-
-Crie um arquivo `README.md` na raiz do projeto com o seguinte conteúdo:
-
 ```markdown
 # Orbit 🚀
 
