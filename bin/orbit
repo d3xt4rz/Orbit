@@ -1,12 +1,11 @@
 #!/bin/bash
 # orbit - Ferramenta de gerenciamento remoto
 
-# === Detecção robusta do diretório raiz ===
+# Detecta o diretório raiz do projeto
 ORBIT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export ORBIT_HOME
-ORBIT_USER="${ORBIT_USER:-$(whoami)}"
 
-# === Função segura para carregar bibliotecas ===
+# Carrega bibliotecas
 _load_lib() {
     local lib_file="$ORBIT_HOME/lib/$1"
     if [[ -f "$lib_file" ]]; then
@@ -21,7 +20,7 @@ _load_lib "core.sh"
 _load_lib "mount.sh"
 _load_lib "ssh.sh"
 
-# === Carregar configurações ===
+# Carrega configuração do projeto
 if [[ -f "$ORBIT_HOME/conf/orbit.conf" ]]; then
     source "$ORBIT_HOME/conf/orbit.conf"
 else
@@ -29,21 +28,19 @@ else
     _orbit_log INFO "Usando valores padrão internos..."
 fi
 
-# Sobrescrita por configuração pessoal (opcional)
 if [[ -f "$HOME/.orbit.conf" ]]; then
     source "$HOME/.orbit.conf"
 fi
 
-# === Verificar dependências ===
+# Verifica dependências
 if ! command -v sshfs &>/dev/null; then
     _orbit_log ERROR "sshfs não está instalado. Instale com: sudo apt install sshfs"
     exit 1
 fi
 
-# === Banner ===
+# Banner
 ORBIT_BANNER="
-${ORBIT_COLOR_CYAN}
- ██████╗ ██████╗ ██████╗ ██╗████████╗
+${ORBIT_COLOR_CYAN} ██████╗ ██████╗ ██████╗ ██╗████████╗
 ██╔═══██╗██╔══██╗██╔══██╗██║╚══██╔══╝
 ██║   ██║██████╔╝██████╔╝██║   ██║   
 ██║   ██║██╔══██╗██╔══██╗██║   ██║   
@@ -58,7 +55,6 @@ _orbit_hline() {
     echo -e "${ORBIT_COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${ORBIT_COLOR_RESET}"
 }
 
-# === Ajuda ===
 orbit_help() {
     echo -e "${ORBIT_COLOR_CYAN}Orbit - Ferramenta de gerenciamento remoto${ORBIT_COLOR_RESET}"
     _orbit_hline
@@ -75,7 +71,6 @@ orbit_help() {
     echo ""
 }
 
-# === Menu interativo ===
 orbit_menu() {
     local menu_lines=(
         "  ${ORBIT_COLOR_GREEN}ssh${ORBIT_COLOR_RESET}          - Conecta via SSH"
@@ -99,7 +94,7 @@ orbit_menu() {
     local total=${#menu_lines[@]}
     local key
 
-    tput civis   # esconde cursor
+    tput civis
 
     while true; do
         clear
@@ -134,14 +129,13 @@ orbit_menu() {
         elif [[ $key == '' ]]; then
             local cmd="${menu_commands[$selected]}"
 
-            # === SAIR COM ESTILO ===
             if [[ "$cmd" == "sair" ]]; then
                 tput cnorm
                 clear
                 show_banner
                 _orbit_hline
                 echo -e "  ${ORBIT_COLOR_GREEN}✨ Orbit encerrado com sucesso! ✨${ORBIT_COLOR_RESET}"
-                echo -e "  ${ORBIT_COLOR_GRAY}Até logo, ${ORBIT_USER:-usuário}! 🚀${ORBIT_COLOR_RESET}"
+                echo -e "  ${ORBIT_COLOR_GRAY}Até logo, e bons voos! 🚀${ORBIT_COLOR_RESET}"
                 _orbit_hline
                 sleep 1.5
                 exit 0
@@ -189,7 +183,6 @@ orbit_menu() {
     done
 }
 
-# === Modo direto (com argumentos) ===
 main() {
     if [[ $# -eq 0 ]]; then
         orbit_menu
@@ -198,6 +191,8 @@ main() {
 
     clear
     show_banner
+    _orbit_hline                         # ← linha antes
+
     local cmd="$1"; shift 2>/dev/null || true
 
     case "$cmd" in
@@ -205,7 +200,18 @@ main() {
             orbit_dir "$@"
             ;;
         ssh|connect)
+            _orbit_log INFO "Iniciando conexão SSH..."
+            _orbit_log INFO "Host: ${ORBIT_SSH_HOST:-209.50.241.196}:${ORBIT_SSH_PORT:-22}"
+            _orbit_log INFO "Usuário: ${ORBIT_SSH_USER:-root}"
+            echo ""
             orbit_ssh "$@"
+            local exit_code=$?
+            echo ""
+            if [[ $exit_code -eq 0 ]]; then
+                _orbit_log SUCCESS "Sessão SSH encerrada"
+            else
+                _orbit_log ERROR "Falha na conexão SSH (código: $exit_code)"
+            fi
             ;;
         help|--help|-h)
             orbit_help
@@ -216,6 +222,8 @@ main() {
             exit 1
             ;;
     esac
+
+    _orbit_hline                         # ← linha depois
 }
 
 main "$@"
