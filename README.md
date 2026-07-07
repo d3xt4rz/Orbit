@@ -16,7 +16,8 @@
 
 ---
 
-## 📦 Instalação
+```
+### 📦 Instalação
 
 ### 1. Clone o repositório
 
